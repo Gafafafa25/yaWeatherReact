@@ -31,10 +31,12 @@ function App() {
         const key = `${lat},${lon}`
         console.log(weatherCache)
 
+        const responseDataDB = await fetch()
         if (weatherCache[key]) {
-            setWeatherData(weatherCache[key])
-            console.log("data from cache")
-            return
+
+            // setWeatherData(weatherCache[key])
+            // console.log("data from cache")
+            // return
         }
         setIsLoading(true)
         const response = await fetch(`https://api.weather.yandex.ru/v2/forecast?lat=${lat}&lon=${lon}`,

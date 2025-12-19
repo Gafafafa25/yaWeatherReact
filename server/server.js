@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.post('/addCoords', async (req, res) => {
+app.post('/postCoords', async (req, res) => {
     const d = req.body;
     try {
         const result = await pool.query("INSERT INTO weather VALUES (DEFAULT, $1, $2, $3, $4)", [])
@@ -31,10 +31,10 @@ app.post('/addCoords', async (req, res) => {
 app.get('/getCoords', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM weather')
+        res.json(result.rows)
     } catch (err) {
         res.status(500).send('Database error');
     }
-    // res.json(data.questions);
 })
 
 
