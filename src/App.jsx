@@ -31,16 +31,41 @@ function App() {
         const key = `${lat},${lon}`
         console.log(weatherCache)
 
-        const responseDataDB = await fetch()
-        if (weatherCache[key]) {
+        const responseDataDB = await fetch('/getCoords', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                studentLogin: "abc"
+            })
+        })
+        console.log(responseDataDB)
+        let res = await responseDataDB.json();
+        console.log(res)
 
+        for(const row in res) {
+            console.log(row.lat_lon)
+            if (row.lat_lon === key) {
+                const weatherInfo = {
+                    temperature: row.temperature,
+                    feels_like: row.feels_like,
+                    wind_direction: row.wind_direction,
+                }
+                setWeatherData(weatherInfo)
+                setIsLoading(false)
+                console.log("data from cache")
+            }
+        }
+        return
+        // if (weatherCache[key]) {
             // setWeatherData(weatherCache[key])
             // console.log("data from cache")
             // return
-        }
+        // }
         setIsLoading(true)
         const response = await fetch(`https://api.weather.yandex.ru/v2/forecast?lat=${lat}&lon=${lon}`,
-            {headers: {'X-Yandex-Weather-Key': APIKEY}})
+            {headers: {'X-Yandex-Weather-Key': "APIKEY"}})
         const data = await response.json()
         const weatherInfo = {
             temperature: data.fact.temp,

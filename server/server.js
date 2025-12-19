@@ -28,7 +28,7 @@ app.post('/postCoords', async (req, res) => {
     res.send('ok')
 })
 
-app.get('/getCoords', async (req, res) => {
+app.post('/getCoords', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM weather')
         res.json(result.rows)
