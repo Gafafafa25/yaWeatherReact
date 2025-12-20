@@ -10,7 +10,7 @@ function App() {
     const [weatherData, setWeatherData] = useState({})
     const [coords, setCoords] = useState("")
     const [isLoading, setIsLoading] = useState(false)
-    const [weatherCache, setWeatherCache] = useState({})
+    // const [weatherCache, setWeatherCache] = useState({})
     const [errorMessage, setErrorMessage] = useState("")
     const [spinnerType, setSpinnerType] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
@@ -28,8 +28,7 @@ function App() {
         const [lat, lon] = coords.split(", ")
         console.log(lat, " lat")
         console.log(lon, " lon")
-        const key = `${lat},${lon}`
-        console.log(weatherCache)
+        const key = `${lat}, ${lon}`
 
         const responseDataDB = await fetch('/getCoords', {
             method: "POST",
@@ -44,8 +43,8 @@ function App() {
         let res = await responseDataDB.json();
         console.log(res)
 
-        for(const row in res) {
-            console.log(row.lat_lon)
+        for(const row of res) {
+            console.log(row.lat_lon, key)
             if (row.lat_lon === key) {
                 const weatherInfo = {
                     temperature: row.temperature,
@@ -55,9 +54,10 @@ function App() {
                 setWeatherData(weatherInfo)
                 setIsLoading(false)
                 console.log("data from cache")
+                return
             }
         }
-        return
+        console.log("after for")
         // if (weatherCache[key]) {
             // setWeatherData(weatherCache[key])
             // console.log("data from cache")
@@ -73,7 +73,8 @@ function App() {
             wind_direction: data.fact.wind_dir
         }
         setWeatherData(weatherInfo)
-        setWeatherCache(prevWeatherCache => ({...prevWeatherCache, [key]: weatherInfo}))
+        // setWeatherCache(prevWeatherCache => ({...prevWeatherCache, [key]: weatherInfo}))
+        //todo: update db
         console.log("data from API")
         setIsLoading(false)
     }
