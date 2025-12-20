@@ -65,7 +65,7 @@ function App() {
         // }
         setIsLoading(true)
         // const response = await fetch(`https://api.weather.yandex.ru/v2/forecast?lat=${lat}&lon=${lon}`,
-        //     {headers: {'X-Yandex-Weather-Key': '8b43f503-eef1-46a2-b785-ea04ae0c9343'}}) //todo:
+        //     {headers: {'X-Yandex-Weather-Key': 'APIKEY'}}) //todo:
         // const data = await response.json()
         const weatherInfo = {
             temperature: data.fact.temp,
