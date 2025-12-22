@@ -98,19 +98,18 @@ function App() {
             },
             body: JSON.stringify({
                 lat_lon: coords,
-                temperature: weatherData.temperature,
-                feels_like: weatherData.feels_like,
-                wind_direction: weatherData.wind_direction
+                temperature: weatherInfo.temperature,
+                feels_like: weatherInfo.feels_like,
+                wind_direction: weatherInfo.wind_direction
             })
         })
         console.log(responseUpdateCacheData)
-        let resultUpdateCacheData = await responseUpdateCacheData.json();
-        console.log(resultUpdateCacheData)
+
 
         // setWeatherCache(prevWeatherCache => ({...prevWeatherCache, [key]: weatherInfo}))
         console.log("data from API")
-        setIsLoading(false)
         setSpinnerType(1)
+        setIsLoading(false)
     }
 
     const handleSubmit = (e) => {
