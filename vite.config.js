@@ -6,8 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/postCoords': 'http://localhost:3000',
-      '/getCoords': 'http://localhost:3000'
+      '/updateCacheData': 'http://localhost:3000',
+      '/getWeather': 'http://localhost:3000',
+      '/getCacheData': 'http://localhost:3000',
+      '/getCacheDataByDestination': 'http://localhost:3000'
     }
   }
 })

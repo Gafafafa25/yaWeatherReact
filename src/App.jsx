@@ -20,7 +20,7 @@ function App() {
         setErrorMessage("")
         // setSpinnerType(1)
         const coordsRegex = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/
-        if (!coords.trim().match(coordsRegex) ) {
+        if (!coords.trim().match(coordsRegex)) {
             setErrorMessage("Invalid coords format")
             return
         }
@@ -30,56 +30,56 @@ function App() {
         console.log(lon, " lon")
         const key = `${lat}, ${lon}`
 
-        const responseDataDB = await fetch('/getCacheData', {
+        // const responseDataDB = await fetch('/getCacheData', {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     }
+        // })
+        // console.log(responseDataDB)
+        // let res = await responseDataDB.json();
+        // console.log(res)
+
+        const responseDataDBByDestination = await fetch('/getCacheDataByDestination', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                studentLogin: "abc"
+                lat_lon: key
             })
         })
-        console.log(responseDataDB)
-        let res = await responseDataDB.json();
-        console.log(res)
+        console.log(responseDataDBByDestination)
+        let resultDataDBByDestination = await responseDataDBByDestination.json();
+        console.log(resultDataDBByDestination)
 
-        for(const row of res) {
-            console.log(row.lat_lon, key)
-            if (row.lat_lon === key) {
-                const weatherInfo = {
-                    temperature: row.temperature,
-                    feels_like: row.feels_like,
-                    wind_direction: row.wind_direction,
-                }
-                setWeatherData(weatherInfo)
-                setIsLoading(false)
-                console.log("data from cache")
-                return
+        if (resultDataDBByDestination.length === 1) {
+            const weatherInfo = {
+                temperature: resultDataDBByDestination[0].temperature,
+                feels_like: resultDataDBByDestination[0].feels_like,
+                wind_direction: resultDataDBByDestination[0].wind_direction
             }
+            setWeatherData(weatherInfo)
+            setIsLoading(false)
+            console.log("data from cache")
+            return
         }
-        console.log("after for")
-        // if (weatherCache[key]) {
-            // setWeatherData(weatherCache[key])
-            // console.log("data from cache")
-            // return
-        // }
+
+        console.log("after if")
+
         setIsLoading(true)
-        // const response = await fetch(`https://api.weather.yandex.ru/v2/forecast?lat=${lat}&lon=${lon}`,
-        //     {headers: {'X-Yandex-Weather-Key': 'APIKEY'}})
-        // const data = await response.json()
-        //todo: fetch /postCoords
-        // const responsePostCoords = await fetch('/updateCacheData', {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     },
-        //     body: JSON.stringify({
-        //         temperature: "abc"
-        //     })
-        // })
-        // console.log(responseDataDB)
-        // let res = await responseDataDB.json();
-        // console.log(res)
+
+        const response = await fetch(`/getWeather`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                lat: lat,
+                lon: lon
+            })
+        })
+        const data = await response.json()
 
         const weatherInfo = {
             temperature: data.fact.temp,
@@ -87,11 +87,30 @@ function App() {
             wind_direction: data.fact.wind_dir
         }
         setWeatherData(weatherInfo)
-        //todo: update db with data
+        setIsLoading(false)
+        setSpinnerType(2)
+        setIsLoading(true)
+        //update db with data
+        const responseUpdateCacheData = await fetch('/updateCacheData', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                lat_lon: coords,
+                temperature: weatherData.temperature,
+                feels_like: weatherData.feels_like,
+                wind_direction: weatherData.wind_direction
+            })
+        })
+        console.log(responseUpdateCacheData)
+        let resultUpdateCacheData = await responseUpdateCacheData.json();
+        console.log(resultUpdateCacheData)
 
         // setWeatherCache(prevWeatherCache => ({...prevWeatherCache, [key]: weatherInfo}))
         console.log("data from API")
         setIsLoading(false)
+        setSpinnerType(1)
     }
 
     const handleSubmit = (e) => {

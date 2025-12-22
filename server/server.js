@@ -28,9 +28,10 @@ app.post("/getWeather", async (req, res) => {
 
 app.post('/updateCacheData', async (req, res) => {
     const d = req.body;
+    console.log("json data ", d)
     try {
         const result = await pool.query("INSERT INTO weather VALUES (DEFAULT, $1, $2, $3, $4)", [d.lat_lon, d.temperature, d.feels_like, d.wind_direction])
-        console.log(result)
+        console.log("res SQL INSERT ", result)
     } catch (err) {
         res.status(500).send('Database error' + err);
     }
@@ -46,6 +47,16 @@ app.post('/getCacheData', async (req, res) => {
     }
 })
 
+app.post('/getCacheDataByDestination', async (req, res) => {
+    const d = req.body;
+    try {
+        const result = await pool.query('SELECT * FROM weather WHERE lat_lon = ($1)', [d.lat_lon])
+        console.log("RES API ", result.rows)
+        res.json(result.rows)
+    } catch (err) {
+        res.status(500).send('Database error' + err);
+    }
+})
 
 app.listen(3000, () => {
     console.log('Server running on http://localhost:3000');
