@@ -11,7 +11,7 @@ const pool = new Pool({
     host: process.env.DB_HOST,
     user:  process.env.DB_USER,
     password:  process.env.DB_PASSWORD,
-    database:  process.env.DB_DATABASE
+    database:  process.env.DB_NAME
 });
 
 const app = express();
@@ -26,22 +26,23 @@ app.post("/getWeather", async (req, res) => {
     res.json(data)
 })
 
-app.post('/postCoords', async (req, res) => {
+app.post('/updateCacheData', async (req, res) => {
     const d = req.body;
     try {
-        const result = await pool.query("INSERT INTO weather VALUES (DEFAULT, $1, $2, $3, $4)", [])
+        const result = await pool.query("INSERT INTO weather VALUES (DEFAULT, $1, $2, $3, $4)", [d.lat_lon, d.temperature, d.feels_like, d.wind_direction])
+        console.log(result)
     } catch (err) {
-        res.status(500).send('Database error');
+        res.status(500).send('Database error' + err);
     }
     res.send('ok')
 })
 
-app.post('/getCoords', async (req, res) => {
+app.post('/getCacheData', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM weather')
         res.json(result.rows)
     } catch (err) {
-        res.status(500).send('Database error');
+        res.status(500).send('Database error' + err);
     }
 })
 

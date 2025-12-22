@@ -30,7 +30,7 @@ function App() {
         console.log(lon, " lon")
         const key = `${lat}, ${lon}`
 
-        const responseDataDB = await fetch('/getCoords', {
+        const responseDataDB = await fetch('/getCacheData', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -65,16 +65,31 @@ function App() {
         // }
         setIsLoading(true)
         // const response = await fetch(`https://api.weather.yandex.ru/v2/forecast?lat=${lat}&lon=${lon}`,
-        //     {headers: {'X-Yandex-Weather-Key': 'APIKEY'}}) //todo:
+        //     {headers: {'X-Yandex-Weather-Key': 'APIKEY'}})
         // const data = await response.json()
+        //todo: fetch /postCoords
+        // const responsePostCoords = await fetch('/updateCacheData', {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     },
+        //     body: JSON.stringify({
+        //         temperature: "abc"
+        //     })
+        // })
+        // console.log(responseDataDB)
+        // let res = await responseDataDB.json();
+        // console.log(res)
+
         const weatherInfo = {
             temperature: data.fact.temp,
             feels_like: data.fact.feels_like,
             wind_direction: data.fact.wind_dir
         }
         setWeatherData(weatherInfo)
+        //todo: update db with data
+
         // setWeatherCache(prevWeatherCache => ({...prevWeatherCache, [key]: weatherInfo}))
-        //todo: update db
         console.log("data from API")
         setIsLoading(false)
     }
