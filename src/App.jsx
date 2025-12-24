@@ -3,6 +3,8 @@ import './App.css'
 import Spinner from '../components/Spinner.jsx';
 import Spinner2 from '../components/Spinner2.jsx';
 import {CiSettings} from "react-icons/ci";
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 import {IoMdClose} from "react-icons/io";
 import {IoMdCheckmark} from "react-icons/io";
 
@@ -54,13 +56,15 @@ function App() {
         console.log(resultDataDBByDestination)
 
         if (resultDataDBByDestination.length === 1) {
+            setIsLoading(true)
             const weatherInfo = {
                 temperature: resultDataDBByDestination[0].temperature,
                 feels_like: resultDataDBByDestination[0].feels_like,
                 wind_direction: resultDataDBByDestination[0].wind_direction
             }
             setWeatherData(weatherInfo)
-            setIsLoading(false)
+            // setIsLoading(false)
+            setTimeout(() => setIsLoading(false), 400);
             console.log("data from cache")
             return
         }
@@ -68,6 +72,8 @@ function App() {
         console.log("after if")
 
         setIsLoading(true)
+        setTimeout(() => setIsLoading(false), 400);
+
 
         const response = await fetch(`/getWeather`, {
             method: "POST",
@@ -109,7 +115,7 @@ function App() {
         // setWeatherCache(prevWeatherCache => ({...prevWeatherCache, [key]: weatherInfo}))
         console.log("data from API")
         setSpinnerType(1)
-        setIsLoading(false)
+        // setIsLoading(false)
     }
 
     const handleSubmit = (e) => {
@@ -120,69 +126,70 @@ function App() {
     return (
         <>
             <h1>Weather</h1>
-            <div>
-                <button onClick={() => setIsOpen(true)}>
-                    <CiSettings size={30}/>
-                </button>
-            </div>
-            {isOpen && (
-                <div className="popup">
-                    <form>
-                        <div>
-                            <input type="radio" id="type1" value="type1" name="radioBtn"
-                                   checked={selectedOption === "type1"} onChange={(e) => {
-                                setSelectedOption(e.target.value);
-                                setSpinnerType(1);
-                                setIsOpen(false);
-                            }}
-                            />
-                            <label htmlFor="type1">type1</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="type2" value="type2" name="radioBtn"
-                                   checked={selectedOption === "type2"} onChange={(e) => {
-                                setSelectedOption(e.target.value);
-                                setSpinnerType(2);
-                                setIsOpen(false);
-                            }}
-                            />
-                            <label htmlFor="type2">type2</label>
-                        </div>
-                    </form>
-                    {/*<button type="button" onClick={() => setIsOpen(false)}>ok</button>*/}
 
-                </div>
-            )}
-            {/*<form action={addCoords} method={postMessage()} onSubmit={handleSubmit}>*/}
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="">55.677443, 37.892383</label>
-                <input type="text" value={coords} onChange={(e) => setCoords(e.target.value)}/>
-                {errorMessage && <p>{errorMessage}</p>}
-                <button type="submit" disabled={isLoading}>Submit</button>
-            </form>
-            <div>
-                {isLoading && spinnerType === 1 && (
-                    <Spinner/>
-                )}
-                {isLoading && spinnerType === 2 && (
-                    <Spinner2/>
-                )}
-            </div>
 
-            {weatherData && (
-                <div>
-                    <h2>Result</h2>
+            <Popup triger={<button><CiSettings size={30}/></button>} position="right center">
+                setIsOpen(true)
+                {isOpen && (
                     <div>
-                        <span>temperature: </span>{weatherData.temperature}
-                        <br/>
-                        <span>feels like: </span>{weatherData.feels_like}
-                        <br/>
-                        <span>wind direction: </span>{weatherData.wind_direction}
-                    </div>
-                </div>
-            )}
-        </>
-    )
-}
+                        <form>
+                            <div>
+                                <input type="radio" id="type1" value="type1" name="radioBtn"
+                                       checked={selectedOption === "type1"} onChange={(e) => {
+                                    setSelectedOption(e.target.value);
+                                    setSpinnerType(1);
+                                    setIsOpen(false);
 
-export default App
+                                }}
+                                />
+                                <label htmlFor="type1">type1</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="type2" value="type2" name="radioBtn"
+                                       checked={selectedOption === "type2"} onChange={(e) => {
+                                    setSelectedOption(e.target.value);
+                                    setSpinnerType(2);
+                                    setIsOpen(false);
+                                }}
+                                />
+                                <label htmlFor="type2">type2</label>
+                            </div>
+                        </form>
+                        {/*<button type="button" onClick={() => setIsOpen(false)}>ok</button>*/}
+
+                    </div>
+                )}
+            </Popup>
+                {/*<form action={addCoords} method={postMessage()} onSubmit={handleSubmit}>*/}
+                <form onSubmit={handleSubmit}>
+                    <label htmlFor="">55.677443, 37.892383</label>
+                    <input type="text" value={coords} onChange={(e) => setCoords(e.target.value)}/>
+                    {errorMessage && <p>{errorMessage}</p>}
+                    <button type="submit" disabled={isLoading}>Submit</button>
+                </form>
+                <div>
+                    {isLoading && spinnerType === 1 && (
+                        <Spinner/>
+                    )}
+                    {isLoading && spinnerType === 2 && (
+                        <Spinner2/>
+                    )}
+                </div>
+
+                {weatherData && (
+                    <div>
+                        <h2>Result</h2>
+                        <div>
+                            <span>temperature: </span>{weatherData.temperature}
+                            <br/>
+                            <span>feels like: </span>{weatherData.feels_like}
+                            <br/>
+                            <span>wind direction: </span>{weatherData.wind_direction}
+                        </div>
+                    </div>
+                )}
+            </>
+            )
+            }
+
+            export default App
