@@ -37,12 +37,12 @@ app.post('/updateCacheData', async (req, res) => {
              DO UPDATE SET \
                     temperature = EXCLUDED.temperature, \
                     time = EXCLUDED.time, \
-                    feels.like = EXCLUDED.feels.like, \
+                    feels.like = EXCLUDED.feels_like, \
                     wind_direction = EXCLUDED.wind_direction",
             [d.lat_lon, d.temperature, d.feels_like, d.wind_direction, Math.floor(Date.now() / 1000)])
         console.log("res SQL INSERT ", result)
     } catch (err) {
-        res.status(500).send('Database error' + err);
+        return res.status(500).send('Database error' + err);
     }
     res.send('ok')
 })
