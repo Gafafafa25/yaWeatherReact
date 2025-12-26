@@ -30,16 +30,17 @@ app.post('/updateCacheData', async (req, res) => {
     const d = req.body;
     console.log("json data ", d)
     try {
-        //todo: if если lat_lon нет, тогда добавляем
-        if (!d.lat_lon) {
-            const result = await pool.query("INSERT INTO weather VALUES (DEFAULT, $1, $2, $3, $4, $5)",
-                [d.lat_lon, d.temperature, d.feels_like, d.wind_direction, Math.floor(Date.now() / 1000)])
-            console.log("res SQL INSERT ", result)
-            return
-        }
-        //todo: else update и Date.now() - обновление
-        const result = await pool.query('UPDATE weather SET time = ($1) WHERE lat_lon = ($2)', [Math.floor(Date.now() / 1000), d.lat_lon])
-        console.log("res SQL UPDATE ", result)
+        const result = await pool.query(
+            "INSERT INTO weather \
+             VALUES (DEFAULT, $1, $2, $3, $4, $5) \
+             ON CONFLICT (lat_lon)\
+             DO UPDATE SET \
+                    temperature = EXCLUDED.temperature, \
+                    time = EXCLUDED.time, \
+                    feels.like = EXCLUDED.feels.like, \
+                    wind_direction = EXCLUDED.wind_direction",
+            [d.lat_lon, d.temperature, d.feels_like, d.wind_direction, Math.floor(Date.now() / 1000)])
+        console.log("res SQL INSERT ", result)
     } catch (err) {
         res.status(500).send('Database error' + err);
     }

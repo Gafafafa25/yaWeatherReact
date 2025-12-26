@@ -20,6 +20,9 @@ function App() {
     const [cacheTime, setCacheTime] = useState(15)
     const [spinnerText, setSpinnerText] = useState("")
 
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
     const getWeatherFromAPI = async () => {
         setErrorMessage("")
         setSpinnerText("")
@@ -35,6 +38,9 @@ function App() {
         console.log(lon, " lon")
         const key = `${lat}, ${lon}`
 
+        setSpinnerText("Loading data from Cache")
+        setIsLoading(true)
+        await delay(1000)
         const responseDataDBByDestination = await fetch('/getCacheDataByDestination', {
             method: "POST",
             headers: {
@@ -45,33 +51,26 @@ function App() {
             })
         })
         let resultDataDBByDestination = await responseDataDBByDestination.json();
-
+        setIsLoading(false)
+        setSpinnerText("")
         if (resultDataDBByDestination.length === 1) {
             const diffTime = Math.floor(Date.now() / 1000) - resultDataDBByDestination[0].time
             console.log("diffTime = ", diffTime)
             if (diffTime < cacheTime) {
-                setSpinnerText("Loading data from Cache")
-                setIsLoading(true)
                 const weatherInfo = {
                     temperature: resultDataDBByDestination[0].temperature,
                     feels_like: resultDataDBByDestination[0].feels_like,
                     wind_direction: resultDataDBByDestination[0].wind_direction
                 }
                 setWeatherData(weatherInfo)
-                setTimeout(() => setIsLoading(false), 1000);
                 console.log("data from cache")
                 return
             }
-            //todo: isRemoved = true send to db ?
         }
-
-        console.log("after if")
 
         setIsLoading(true)
         setSpinnerText("Receiving data from API")
-        setTimeout(() => setIsLoading(false), 1000);
-
-
+        await delay(1000)
         const response = await fetch(`/getWeather`, {
             method: "POST",
             headers: {
@@ -83,6 +82,8 @@ function App() {
             })
         })
         const data = await response.json()
+        setIsLoading(false)
+        setSpinnerText("")
         console.log(data)
         const weatherInfo = {
             temperature: data.fact.temp,
@@ -90,12 +91,11 @@ function App() {
             wind_direction: data.fact.wind_dir
         }
         setWeatherData(weatherInfo)
-        setIsLoading(false)
+
         setSpinnerType(2)
         setIsLoading(true)
         setSpinnerText("Saving data")
-
-        //update db with data
+        await delay(1000)
         const responseUpdateCacheData = await fetch('/updateCacheData', {
             method: "POST",
             headers: {
@@ -108,10 +108,10 @@ function App() {
                 wind_direction: weatherInfo.wind_direction
             })
         })
-
+        setIsLoading(false)
+        setSpinnerText("")
         console.log("data from API")
         setSpinnerType(1)
-        // setIsLoading(false)
     }
 
     const handleSubmit = (e) => {
