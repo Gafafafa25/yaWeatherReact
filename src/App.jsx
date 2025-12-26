@@ -17,10 +17,13 @@ function App() {
     const [spinnerType, setSpinnerType] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
     const [selectedOption, setSelectedOption] = useState("type1")
+    const [cacheTime, setCacheTime] = useState(15)
+    const [spinnerText, setSpinnerText] = useState("")
 
     const getWeatherFromAPI = async () => {
         setErrorMessage("")
-        // setSpinnerType(1)
+        setSpinnerText("")
+
         const coordsRegex = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/
         if (!coords.trim().match(coordsRegex)) {
             setErrorMessage("Invalid coords format")
@@ -46,7 +49,8 @@ function App() {
         if (resultDataDBByDestination.length === 1) {
             const diffTime = Math.floor(Date.now() / 1000) - resultDataDBByDestination[0].time
             console.log("diffTime = ", diffTime)
-            if (diffTime < 15) {
+            if (diffTime < cacheTime) {
+                setSpinnerText("Loading data from Cache")
                 setIsLoading(true)
                 const weatherInfo = {
                     temperature: resultDataDBByDestination[0].temperature,
@@ -54,16 +58,18 @@ function App() {
                     wind_direction: resultDataDBByDestination[0].wind_direction
                 }
                 setWeatherData(weatherInfo)
-                setTimeout(() => setIsLoading(false), 4000);
+                setTimeout(() => setIsLoading(false), 1000);
                 console.log("data from cache")
                 return
             }
+            //todo: isRemoved = true send to db ?
         }
 
         console.log("after if")
 
         setIsLoading(true)
-        setTimeout(() => setIsLoading(false), 4000);
+        setSpinnerText("Receiving data from API")
+        setTimeout(() => setIsLoading(false), 1000);
 
 
         const response = await fetch(`/getWeather`, {
@@ -87,6 +93,7 @@ function App() {
         setIsLoading(false)
         setSpinnerType(2)
         setIsLoading(true)
+        setSpinnerText("Saving data")
 
         //update db with data
         const responseUpdateCacheData = await fetch('/updateCacheData', {
@@ -122,6 +129,7 @@ function App() {
                 {/*{isOpen && (*/}
                 <div>
                     <form>
+                        <p>Change spinner:</p>
                         <div>
                             <input type="radio" id="type1" value="type1" name="radioBtn"
                                    checked={selectedOption === "type1"} onChange={(e) => {
@@ -131,7 +139,7 @@ function App() {
 
                             }}
                             />
-                            <label htmlFor="type1">type1</label>
+                            <label htmlFor="type1">type 1</label>
                         </div>
                         <div>
                             <input type="radio" id="type2" value="type2" name="radioBtn"
@@ -141,9 +149,17 @@ function App() {
                                 setIsOpen(false);
                             }}
                             />
-                            <label htmlFor="type2">type2</label>
+                            <label htmlFor="type2">type 2</label>
+                        </div>
+                        <div>
+                            <p>Set cache storage: </p>
+                            <input type="text" id="cacheStorage" name="cacheStorage" onChange={(e) => {
+                                setCacheTime(e.target.value)
+                            }}/>
+                            <label htmlFor="cacheStorage"> sec</label>
                         </div>
                     </form>
+
                     {/*<button type="button" onClick={() => setIsOpen(false)}>ok</button>*/}
 
                 </div>
@@ -157,6 +173,7 @@ function App() {
                 <button type="submit" disabled={isLoading}>Submit</button>
             </form>
             <div>
+                <p>{spinnerText}</p>
                 {isLoading && spinnerType === 1 && (
                     <Spinner/>
                 )}
