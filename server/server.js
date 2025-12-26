@@ -9,9 +9,9 @@ const {Pool} = pg
 
 const pool = new Pool({
     host: process.env.DB_HOST,
-    user:  process.env.DB_USER,
-    password:  process.env.DB_PASSWORD,
-    database:  process.env.DB_NAME
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 const app = express();
@@ -21,7 +21,7 @@ app.use(cors());
 app.post("/getWeather", async (req, res) => {
     const {lat, lon} = req.body;
     const response = await fetch(`https://api.weather.yandex.ru/v2/forecast?lat=${lat}&lon=${lon}`,
-        {headers: {'X-Yandex-Weather-Key':  process.env.APIKEY}})
+        {headers: {'X-Yandex-Weather-Key': process.env.APIKEY}})
     const data = await response.json()
     res.json(data)
 })
@@ -30,7 +30,10 @@ app.post('/updateCacheData', async (req, res) => {
     const d = req.body;
     console.log("json data ", d)
     try {
-        const result = await pool.query("INSERT INTO weather VALUES (DEFAULT, $1, $2, $3, $4)", [d.lat_lon, d.temperature, d.feels_like, d.wind_direction])
+        //todo: if если lat_lon нет, тогда добавляем
+        const result = await pool.query("INSERT INTO weather VALUES (DEFAULT, $1, $2, $3, $4, $5)",
+            [d.lat_lon, d.temperature, d.feels_like, d.wind_direction, Math.floor(Date.now() / 1000)])
+        //todo: else update и Date.now() - обновление
         console.log("res SQL INSERT ", result)
     } catch (err) {
         res.status(500).send('Database error' + err);
