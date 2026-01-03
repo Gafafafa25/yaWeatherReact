@@ -56,6 +56,17 @@ app.post('/getCacheData', async (req, res) => {
     }
 })
 
+app.post('/getCityFromCache', async (req, res) => {
+    const d = req.body;
+    try {
+        const result = await pool.query('SELECT * FROM location  WHERE lat_lon = ($1)', [d.lat_lon])
+        res.json(result.rows)
+    } catch (err) {
+        res.status(500).send('Database error' + err);
+    }
+})
+
+
 app.post('/getCacheDataByDestination', async (req, res) => {
     const d = req.body;
     try {

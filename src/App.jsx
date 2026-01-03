@@ -4,6 +4,7 @@ import Spinner from '../components/Spinner.jsx';
 import Spinner2 from '../components/Spinner2.jsx';
 import {CiSettings} from "react-icons/ci";
 import Popup from 'reactjs-popup';
+
 import 'reactjs-popup/dist/index.css';
 import {IoMdClose} from "react-icons/io";
 import {IoMdCheckmark} from "react-icons/io";
@@ -19,6 +20,8 @@ function App() {
     const [selectedOption, setSelectedOption] = useState("type1")
     const [cacheTime, setCacheTime] = useState(15)
     const [spinnerText, setSpinnerText] = useState("")
+    const [cityName, setCityName] = useState("")
+    const [isFirstInput, setIsFirstInput] = useState(true)
 
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -51,6 +54,18 @@ function App() {
             })
         })
         let resultDataDBByDestination = await responseDataDBByDestination.json();
+
+        const responseCityFromCache = await fetch('/getCacheDataByDestination', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                lat_lon: key
+            })
+        })
+        let resultCityFromCache = await responseDataDBByDestination.json();
+
         setIsLoading(false)
         setSpinnerText("")
         if (resultDataDBByDestination.length === 1) {
@@ -63,7 +78,9 @@ function App() {
                     wind_direction: resultDataDBByDestination[0].wind_direction
                 }
                 setWeatherData(weatherInfo)
+                setCityName(resultCityFromCache.name)
                 console.log("data from cache")
+                console.log(cityName)
                 return
             }
         }
@@ -85,6 +102,10 @@ function App() {
         setIsLoading(false)
         setSpinnerText("")
         console.log(data)
+
+        setCityName(`${data.info.name}`)
+        console.log(cityName)
+
         const weatherInfo = {
             temperature: data.fact.temp,
             feels_like: data.fact.feels_like,
@@ -116,17 +137,20 @@ function App() {
 
     const handleSubmit = (e) => {
         e.preventDefault()
+        console.log(cacheTime)
+        return
         getWeatherFromAPI()
     }
 
+
     return (
         <>
+
             <h1>Weather</h1>
 
 
             <Popup trigger={<button><CiSettings size={30}/></button>} position="right center">
-                {/*setIsOpen(true)*/}
-                {/*{isOpen && (*/}
+                {/*<Popup.CloseButton />*/}
                 <div>
                     <form>
                         <p>Change spinner:</p>
@@ -153,9 +177,10 @@ function App() {
                         </div>
                         <div>
                             <p>Set cache storage: </p>
-                            <input type="text" id="cacheStorage" name="cacheStorage" onChange={(e) => {
-                                setCacheTime(e.target.value)
-                            }}/>
+                            <input type="text" id="cacheStorage" name="cacheStorage" value={cacheTime}
+                                   onChange={(e) => {
+                                       setCacheTime(e.target.value)
+                                   }}/>
                             <label htmlFor="cacheStorage"> sec</label>
                         </div>
                     </form>
@@ -168,9 +193,22 @@ function App() {
             {/*<form action={addCoords} method={postMessage()} onSubmit={handleSubmit}>*/}
             <form onSubmit={handleSubmit}>
                 <label htmlFor="">55.677443, 37.892383</label>
-                <input type="text" value={coords} onChange={(e) => setCoords(e.target.value)}/>
+                {isFirstInput ? (
+                        <div>
+                            <input type="text" value={coords} onChange={(e) => setCoords(e.target.value)}/>
+                        </div>)
+                    : (
+                        <div>
+                            {/*<input type="text" value={cityName}/>*/}
+                            <input type="text" value={`cityName`}/>
+                        </div>
+                    )
+                }
+                {/*<input type="text" value={coords} onChange={(e) => setCoords(e.target.value)}/>*/}
+                {/*<input type="text" value={cityName}/>*/}
                 {errorMessage && <p>{errorMessage}</p>}
                 <button type="submit" disabled={isLoading}>Submit</button>
+                {/*<button type="submit" onClick={setIsFirstInput(!isFirstInput)} disabled={isLoading}>Submit</button>*/}
             </form>
             <div>
                 <p>{spinnerText}</p>
